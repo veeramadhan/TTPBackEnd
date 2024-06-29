@@ -3,7 +3,7 @@ const mysql = require("mysql");
 const cors = require("cors");
 
 const app = express();
-app.use(cors({ origin: "*" })); // Configure CORS as needed
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 const db = mysql.createConnection({
@@ -49,7 +49,16 @@ app.post("/authenticateUser", (req, res) => {
   });
 });
 
-
+app.get("/places", (req, res) => {
+  const sql = "SELECT * FROM places";
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error fetching places:", err);
+      return res.status(500).json({ error: "Failed to fetch places." });
+    }
+    return res.status(200).json(results);
+  });
+});
 
 app.listen(8081, () => {
   console.log("Server is listening on port 8081.");
