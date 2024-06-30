@@ -1,10 +1,26 @@
 const express = require("express");
 const mysql = require("mysql");
 const cors = require("cors");
+const session = require('express-session');
+const crypto = require('crypto');
+
+// Generate a secret key (use this only once and save it for future use)
+const secret = crypto.randomBytes(64).toString('hex');
 
 const app = express();
-app.use(cors({ origin: "*" }));
 app.use(express.json());
+
+app.use(cors({
+  origin: 'http://localhost:3000', // Replace with your frontend URL
+  credentials: true
+}));
+
+app.use(session({
+  secret: secret, // Your generated secret key
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set to true if using HTTPS
+}));
 
 const db = mysql.createConnection({
   host: "localhost",
@@ -57,6 +73,15 @@ app.get("/places", (req, res) => {
       return res.status(500).json({ error: "Failed to fetch places." });
     }
     return res.status(200).json(results);
+  });
+});
+
+app.post("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ error: "Request failed" });
+    }
+    return res.status(200).json({ message: 'Successfully logged out' });
   });
 });
 
