@@ -76,6 +76,24 @@ app.get("/places", (req, res) => {
   });
 });
 
+
+
+app.post("/createQuotation", (req, res) => {
+  const sql = "INSERT INTO quotationdatabaseall (packagetype) VALUES (?)";
+  const values = [''];  // Insert a placeholder value or modify to meet your needs
+  
+  db.query(sql, [values], (err, results) => {
+    if (err) {
+      console.error("Error creating quotation record:", err);
+      return res.status(500).json({ error: "Failed to create new quotation record." });
+    }
+    // Return the new ID and success message
+    const newId = results.insertId;
+    return res.status(200).json({ message: "Quotation ID generated successfully.", id: newId });
+  });
+});
+
+
 app.listen(8081, () => {
   console.log("Server is listening on port 8081.");
 });
