@@ -38,8 +38,8 @@ db.connect((err) => {
 });
 
 app.post("/createid", (req, res) => {
-  const sql = "INSERT INTO login (`name`, `email`, `password`,`adminAccess`,`quatationAccess`,`quatationedtaccess`) VALUES (?)";
-  const values = [req.body.username, req.body.email, req.body.password, req.body.admin, req.body.editAccess, req.body.quotation];
+  const sql = "INSERT INTO login (`name`, `email`, `password`,`adminAccess`,`quatationAccess`,`quatationedtaccess` ,  `userId`) VALUES (?)";
+  const values = [req.body.username, req.body.email, req.body.password, req.body.admin, req.body.editAccess, req.body.quotation, ''];
   db.query(sql, [values], (err, data) => {
     if (err) {
       return res.status(500).json({ error: "Failed to insert new user." });
@@ -51,7 +51,6 @@ app.post("/createid", (req, res) => {
 app.post("/authenticateUser", (req, res) => {
   const { userName, password } = req.body;
   const sql = "SELECT * FROM login WHERE email = ? AND password = ?";
-
   db.query(sql, [userName, password], (err, results) => {
     if (err) {
       console.error("Error authenticating user:", err);
@@ -79,20 +78,44 @@ app.get("/places", (req, res) => {
 
 
 app.post("/createQuotation", (req, res) => {
-  const sql = "INSERT INTO quotationdatabaseall (packagetype) VALUES (?)";
-  const values = [''];  // Insert a placeholder value or modify to meet your needs
-  
+  const sql = "INSERT INTO quotationdatabaseall (  createdBy, createdByID, createdAt ) VALUES (?)";
+  const values = [req.body.userId, req.body.name, Date.now()];
   db.query(sql, [values], (err, results) => {
     if (err) {
       console.error("Error creating quotation record:", err);
       return res.status(500).json({ error: "Failed to create new quotation record." });
     }
-    // Return the new ID and success message
     const newId = results.insertId;
-    return res.status(200).json({ message: "Quotation ID generated successfully.", id: newId });
+    return res.status(200).json({ message: "Quotation ID generated successfully.", id: newId, status: 200 });
   });
 });
 
+
+
+app.post("/saveQuatation/:id", (request, response) => {
+
+  const id = request.params.id;
+  const sqlQuery = `UPDATE quotationdatabaseall SET packagetype = ? WHERE id = ? `;
+
+  db.query(sqlQuery, [request.body.packageType, id], (error, result) => {
+    if (error) {
+      return response.status(500).send(error)
+    }
+    response.json({ staus: 200, message: 'Data updated' });
+  })
+
+})
+
+app.post("/getquatationbyUserID/:id", (request, response) => {
+  const userId = request.params.id;
+  const sqlQuery = `SELECT * FROM quotationdatabaseall WHERE createdBy = ?`
+  db.query(sqlQuery, [userId], (error, result) => {
+    if (error) {
+      return response.status(500).send(error)
+    }
+    response.json({ status: 200, result })
+  })
+})
 
 app.listen(8081, () => {
   console.log("Server is listening on port 8081.");
