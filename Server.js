@@ -93,18 +93,24 @@ app.post("/createQuotation", (req, res) => {
 
 
 app.post("/saveQuatation/:id", (request, response) => {
-
   const id = request.params.id;
-  const sqlQuery = `UPDATE quotationdatabaseall SET packagetype = ? WHERE id = ? `;
+  const { packageType, startDate, endDate, inbetweenDays } = request.body;
 
-  db.query(sqlQuery, [request.body.packageType, id], (error, result) => {
+  // Ensure that startDate and endDate are not null or undefined
+  if (!startDate || !endDate) {
+    return response.status(400).send({ status: 400, message: 'Start date and End date are required' });
+  }
+
+  const sqlQuery = "UPDATE quotationdatabaseall SET packagetype = ?, StartDate = ?, EndDate = ?, inbetweendays = ? WHERE id = ?";
+  db.query(sqlQuery, [packageType, startDate, endDate, inbetweenDays, id], (error, result) => {
     if (error) {
-      return response.status(500).send(error)
+      return response.status(500).send({ status: 500, message: error.message });
     }
-    response.json({ staus: 200, message: 'Data updated' });
-  })
+    response.json({ status: 200, message: 'Data updated' });
+  });
+});
 
-})
+
 
 app.post("/getquatationbyUserID/:id", (request, response) => {
   const userId = request.params.id;
