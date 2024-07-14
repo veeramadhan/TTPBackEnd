@@ -113,9 +113,9 @@ app.post("/saveQuatation/:id", (request, response) => {
 
 
 app.post("/getquatationbyUserID/:id", (request, response) => {
-  const userId = request.params.id;
-  const sqlQuery = `SELECT * FROM quotationdatabaseall WHERE createdBy = ?`
-  db.query(sqlQuery, [userId], (error, result) => {
+  const id = request.params.id;
+  const sqlQuery = `SELECT * FROM quotationdatabaseall WHERE id = ?`
+  db.query(sqlQuery, [id], (error, result) => {
     if (error) {
       return response.status(500).send(error)
     }
