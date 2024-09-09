@@ -111,10 +111,9 @@ app.post("/saveQuatation/:id", (request, response) => {
 });
 
 
-
-app.post("/getquatationbyUserID/:id", (request, response) => {
+app.post("/getquatationbyID/:id", (request, response) => {
   const id = request.params.id;
-  const sqlQuery = `SELECT * FROM quotationdatabaseall WHERE id = ?`
+  const sqlQuery = `SELECT * FROM quotationdatabaseall WHERE createdBy  =  ?`
   db.query(sqlQuery, [id], (error, result) => {
     if (error) {
       return response.status(500).send(error)
@@ -122,6 +121,21 @@ app.post("/getquatationbyUserID/:id", (request, response) => {
     response.json({ status: 200, result })
   })
 })
+
+
+app.post("/getquatationbyQuatationid/:id", (request, response) => {
+  const id = request.params.id;
+  const sqlQuery = `SELECT * FROM quotationdatabaseall WHERE id  =  ?`
+  db.query(sqlQuery, [id], (error, result) => {
+    if (error) {
+      return response.status(500).send(error)
+    }
+    response.json({ status: 200, result })
+  })
+})
+
+
+
 
 app.listen(8081, () => {
   console.log("Server is listening on port 8081.");
