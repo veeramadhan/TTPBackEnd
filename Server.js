@@ -75,6 +75,77 @@ app.get("/places", (req, res) => {
   });
 });
 
+app.get("/places/cost/:id", (req, res) => {
+  const { id } = req.params; // ID of the place
+  const { adults } = req.query;  // Query parameter for the number of adults
+
+  const sql = "SELECT * FROM places WHERE id = ?";
+
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      console.error("Error fetching place:", err);
+      return res.status(500).json({ error: "Failed to fetch place." });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Place not found." });
+    }
+
+    const place = results[0];
+    const adultRate = place.adultrate;
+
+    // Calculate total cost based on the number of adults
+    const totalCost = (adults * adultRate);
+
+    return res.status(200).json({
+      place: place.name,
+      totalCost,
+      adults: adults || 0
+    });
+  });
+});
+
+
+app.put("/places/:id", (req, res) => {
+  const { id } = req.params;
+  const { adultrate } = req.body;  // New adult rate passed in the request body
+
+  const sql = "UPDATE places SET adultrate = ? WHERE id = ?";
+
+  db.query(sql, [adultrate, id], (err, result) => {
+    if (err) {
+      console.error("Error updating adultrate:", err);
+      return res.status(500).json({ error: "Failed to update adultrate." });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Place not found." });
+    }
+
+    return res.status(200).json({ message: "Adult rate updated successfully." });
+  });
+});
+
+
+// Fetch extraactivities data
+app.get('/extraactivites', (req, res) => {
+  let query = `SELECT * FROM extraactivites`;
+
+  // Search query filter
+  const search = req.query.search;
+  if (search) {
+      query += ` WHERE city LIKE '%${search}%' OR name LIKE '%${search}%'`;
+  }
+
+  db.query(query, (err, results) => {
+      if (err) {
+          return res.status(500).send(err);
+      }
+      res.json(results);
+  });
+});
+
+
 
 
 app.post("/createQuotation", (req, res) => {
